@@ -289,9 +289,9 @@ resptrans-unit-l a = j {_}
                               refl ≡
                               (trans
                                      (trans-unit-left x')
-                                     (trans refl
---                                            (trans (sym (trans-unit-left x')) refl)
-                                            (trans (sym (trans-unit-left x')) refl)
+                                     ( x'               ≃⟨ refl ⟩
+                                       x'               ≃⟨ (sym (trans-unit-left x')) ⟩
+                                       trans refl x' ∎
                                      )
 
                               )
