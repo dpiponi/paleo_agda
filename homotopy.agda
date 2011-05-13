@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K #-}
 
-module manel where
+module homotopy where
 
 infix 3 _≡_
 
@@ -200,8 +200,6 @@ resptrans-unit-r : {A : Set} {x y : A} {p q : x ≡ y}
 resptrans-unit-r a = j (λ _ _ p → (resptrans p (refl {_} {refl})) ≡ p) a (λ _ → refl)
 
 
-resptrans-unit-l : {A : Set} {x y : A} {p q : x ≡ y} 
-                  -> (a : p ≡ q) -> (resptrans (refl {_} {refl}) a) ≡ ( (trans (trans-unit-left p) (trans a (sym (trans-unit-left q)))) )
 
 {-
 resptrans-unit-l a = j {_}
@@ -245,6 +243,30 @@ resptrans-unit-l a = j {_}
                               ))
                            x (λ _ → refl))
 -}
+
+{-
+x y : A
+p : x ≡ y
+q : x ≡ y
+a : p ≡ q
+resptrans : {A : Set} {x y z : A} {ppp qqqq : x ≡ y} {p q : y ≡ z} 
+           -> xxx ≡ xxx -> p' ≡ q' -> trans p p' ≡ trans q q'
+resptrans (refl {_} {refl} : xxx ≡ xxx) (a : p ≡ q) : trans xxx p ≡ trans xxx q
+
+trans-unit-left : {A : Set} {x y : A} -> (p : x ≡ y) -> trans refl p ≡ p 
+trans-unit-left p : trans refl p ≡ p
+
+trans a (trans (sym (trans-unit-left q) : q ≡ trans refl q) refl)
+trans a (trans (sym (trans-unit-left q) : q ≡ trans refl q) (trans refl q ∎))
+
+_∎ : ∀ {A : Set} (x : A) → x ≡ x
+_∎ _ = refl
+
+
+-}
+resptrans-unit-l : {A : Set} {x y : A} {p q : x ≡ y} 
+                  -> (a : p ≡ q) -> (resptrans (refl {_} {refl}) a) ≡
+                 ( (trans (trans-unit-left p) (trans a (trans (sym (trans-unit-left q)) refl))) )
 
 resptrans-unit-l a = j {_}
                         (λ p' q' a' →
