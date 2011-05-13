@@ -267,10 +267,10 @@ _∎ _ = refl
 resptrans-unit-l : {A : Set} {x y : A} {p q : x ≡ y} 
                   -> (a : p ≡ q) -> (resptrans (refl {_} {refl}) a) ≡
                  ( (trans (trans-unit-left p) (
-                                           trans a (
+                                                 p ≃⟨ a ⟩
                                                  q ≃⟨ sym (trans-unit-left q)⟩
                                                  trans refl q ∎
-                                                   )
+                                                   
                                                      )) )
 
 resptrans-unit-l a = j {_}
