@@ -269,21 +269,19 @@ resptrans : {A : Set} {x y z : A} {p q : x ≡ y} {p' q' : y ≡ z}
 resptrans-unit-l : {A : Set} {x y : A} {p q : x ≡ y} 
                   -> (a : p ≡ q) -> (resptrans (refl {_} {refl}) a) ≡
                                                 (trans refl p ≃⟨ trans-unit-left p ⟩
-                                                 p ≃⟨ a ⟩
-                                                 q ≃⟨ sym (trans-unit-left q)⟩
+                                                 p            ≃⟨ a ⟩
+                                                 q            ≃⟨ sym (trans-unit-left q)⟩
                                                  trans refl q ∎)
                                                    
 
 resptrans-unit-l a = j {_}
                         (λ p' q' a' →
                            (resp (trans refl) a') ≡
-                           (trans (trans-unit-left p') (
-                                                   p' ≃⟨ a' ⟩
-                                                   
-                                                   q' ≃⟨ sym (trans-unit-left q')⟩
-                                                   trans refl q' ∎
-
-                                                                 )))
+                                                  (trans refl p' ≃⟨ trans-unit-left p' ⟩ 
+                                                   p'            ≃⟨ a' ⟩
+                                                   q'            ≃⟨ sym (trans-unit-left q')⟩
+                                                   trans refl q' ∎)
+                                                                )
                         {_} {_} a
                         (λ x →
                            j
