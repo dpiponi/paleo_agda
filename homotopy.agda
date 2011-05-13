@@ -278,10 +278,11 @@ resptrans-unit-l a = j {_}
                         (λ p' q' a' →
                            (resp (trans refl) a') ≡
                            (trans (trans-unit-left p') (
-                                                   trans a'
-                                                   (
+                                                   p' ≃⟨ a' ⟩
+                                                   
                                                    q' ≃⟨ sym (trans-unit-left q')⟩
-                                                   trans refl q' ∎)
+                                                   trans refl q' ∎
+
                                                                  )))
                         {_} {_} a
                         (λ x →
