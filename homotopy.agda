@@ -287,16 +287,15 @@ resptrans-unit-l a = j {_}
                            j
                            (λ xend _ x' →
                               refl ≡
-
                               (trans
                                (trans-unit-left x')
                                (trans refl
-                                (j (λ x0 y _ → y ≡ x0)
-                                   (trans-unit-left x')
-                                 (λ _ → refl)))
-                              )
 
-)
+--                                (j (λ x0 y _ → y ≡ x0) (trans-unit-left x') (λ _ → refl))
+                                (j (λ x0 y _ → y ≡ x0) (trans-unit-left x') (λ _ → refl))
+                                  )
+
+                              ))
                            x (λ _ → refl))
 
 {-
