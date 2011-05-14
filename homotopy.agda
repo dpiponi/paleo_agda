@@ -40,37 +40,6 @@ subst C p = j (λ x y _ → C x → C y) p (λ x → λ x' → x')
 trans : {A : Set} {M N P : A} -> M ≡ N -> N ≡ P -> M ≡ P
 trans {A}{M}{N}{P} a b = subst (\ x -> M ≡ x) b a
 
-data Nat : Set where
-  zero : Nat
-  suc  : Nat -> Nat
-
-infixl 6 _+_
-infixl 8 _×_
-
-_+_ : Nat -> Nat -> Nat
-zero + b = b
-suc a + b = suc (a + b)
-
-_×_ : Nat -> Nat -> Nat
-zero × b = zero
-suc a × b = b + (a × b)
-
-a≡a+0 : ∀ {a} -> a ≡ (a + zero)
-a≡a+0 {zero}   = refl
-a≡a+0 {suc a'} = cong suc a≡a+0
-
-sa+b≡a+sb : ∀ {a b} → (suc a + b) ≡ (a + suc b)
-sa+b≡a+sb {zero} {b} = refl
-sa+b≡a+sb {suc a} {b} = cong suc (sa+b≡a+sb {a})
-
-comm : ∀ {a b} → (a + b) ≡ (b + a)
-comm {zero} {b} = a≡a+0
-comm {suc a} {b} = trans (cong suc (comm {a})) (sa+b≡a+sb {b})
-
-a×0≡0 : ∀ {a} → (a × zero) ≡ zero
-a×0≡0 {zero} = refl
-a×0≡0 {suc a} = cong (_+_ zero) (a×0≡0 {a})
-
 infix  2 _∎
 infixr 2 _≃⟨_⟩_ 
  
@@ -80,77 +49,6 @@ _ ≃⟨ p1 ⟩ p2 = (trans p1 p2)
 _∎ : ∀ {A : Set} (x : A) → x ≡ x
 _∎ _ = refl
 
-a+1≡sa : {a : Nat} -> (suc zero + a) ≡ suc a
-a+1≡sa {a} = (suc zero + a) ≃⟨ refl ⟩ (suc a ∎)
-
-a+2≡sa : {a : Nat} -> (suc (suc zero) + a) ≡ suc (suc a)
-a+2≡sa {a} = (suc (suc zero) + a) ≃⟨ refl ⟩ (suc (suc a) ∎)
-
-a+b≣b+a : ∀ {a b} → (a + b) ≡ (b + a)
-a+b≣b+a {zero}  {b} = a≡a+0
-a+b≣b+a {suc a} {b} = suc a + b ≃⟨ sa+b≡a+sb {a}⟩
-                      a + suc b ≃⟨ a+b≣b+a {a}⟩
-                      suc b + a ≃⟨ sa+b≡a+sb {b}⟩
-                      b + suc a ∎
-
-assoc+ : ∀ {a b c} → (a + (b + c)) ≡ ((a + b) + c)
-assoc+ {zero} = refl
-assoc+ {suc a} {b} {c} = suc a + (b + c) ≃⟨ sa+b≡a+sb {a} ⟩
-                          a + suc (b + c) ≃⟨ refl ⟩
-                          a + (suc b + c) ≃⟨ assoc+ {a} {suc b} ⟩
-                          (a + suc b) + c ≃⟨ cong (λ x → x + c) (sym (sa+b≡a+sb {a})) ⟩
-                          (suc a + b) + c ∎
-
-inter : ∀ {a b c d} → (a + b) + (c + d) ≡ (a + c) + (b + d)
-inter {a} {b} {c} {d} = (a + b) + (c + d) ≃⟨ assoc+ {a + b} ⟩
-                        ((a + b) + c) + d ≃⟨ cong (λ x → x + d) (sym (assoc+ {a}))⟩
-                        a + (b + c) + d ≃⟨ cong (λ x → a + x + d) (comm {b}) ⟩
-                        a + (c + b) + d ≃⟨ cong (λ x → x + d) (assoc+ {a})⟩
-                        a + c + b + d ≃⟨ sym (assoc+ {a + c})⟩
-                        (a + c) + (b + d) ∎
-
-dist : ∀ {a b c} → a × (b + c) ≡ a × b + a × c
-dist {zero} = refl
-dist {suc a} {b} {c} = suc a × (b + c) ≃⟨ refl ⟩
-                       (b + c) + a × (b + c) ≃⟨ cong (λ x → (b + c) + x) (dist {a}) ⟩
-                       (b + c) + (a × b + a × c) ≃⟨ inter {b}⟩
-                       (b + a × b) + (c + a × c) ≃⟨ refl ⟩
-                       (suc a × b) + (suc a × c) ∎
-
-a×sb≡a+a×b : ∀ {a b} → a × suc b ≡ a + a × b
-a×sb≡a+a×b {zero} = refl
-a×sb≡a+a×b {suc a} {b} = suc a × suc b ≃⟨ refl ⟩
-                       suc b + a × suc b ≃⟨ cong (λ x → suc b + x) (a×sb≡a+a×b {a}) ⟩
-                       suc b + (a + a × b) ≃⟨ assoc+ {suc b}⟩
-                       (suc b + a) + a × b ≃⟨ cong (λ x → x + a × b) (comm {suc b}) ⟩
-                       (a + suc b) + a × b ≃⟨ cong (λ x → x + a × b) (sym (sa+b≡a+sb {a})) ⟩
-                       (suc a + b) + a × b ≃⟨ sym (assoc+ {suc a})⟩
-                       suc a + (b + a × b) ≃⟨ refl ⟩
-                       suc a + (suc a × b) ∎
-
-comm× : ∀ {a b} → a × b ≡ b × a
-comm× {zero} {b} = zero × b ≃⟨ refl ⟩
-                   zero ≃⟨ sym (a×0≡0 {b}) ⟩
-                   b × zero ∎
-
-comm× {suc a} {b} = suc a × b ≃⟨ refl ⟩
-                    b + a × b ≃⟨ cong (λ x → b + x) (comm× {a}) ⟩
-                    b + b × a ≃⟨ sym (a×sb≡a+a×b {b}) ⟩
-                    b × suc a ∎
-
-n = suc zero + suc zero
-
-{- suc (suc zero) ≡ suc zero + suc zero -}
-
-{-
-C : (x y : A) → x ≡ y → Set
-refl : M ≡ N
-b : ((x : A) → C x x refl)
-
-b _ : C M N P
-C x x refl = C M N P
-M : A
--}
 
 subst' : {A : Set} (p : A → Set) {x y : A} -> x ≡ y -> p x → p y
 subst' p proof = j (λ x y _ → (p x → p y)) proof (λ x → λ y → y) 
@@ -236,26 +134,22 @@ trans-resptrans-ichange {A}{x}{y}{z} p q a = j
                  (λ p' q' a' →
                     (r : x ≡ y) (b : q' ≡ r) (p0 q0 : y ≡ z) (c : p0 ≡ q0) (r' : y ≡ z)
                     (d : q0 ≡ r') →
-                    (resptrans (trans a' b) (trans c d)) ≡
-                    (trans (resptrans a' c) (resptrans b d)))
+                    (resptrans (trans a' b) (trans c d)) ≡ (trans (resptrans a' c) (resptrans b d)))
                  a
                  (λ pq r b →
                     j
                     (λ pq' r' b' →
                        (p' q' : y ≡ z) (c : p' ≡ q') (r0 : y ≡ z) (d : q' ≡ r0) →
-                       (resptrans (trans refl b') (trans c d)) ≡
-                       (trans (resptrans refl c) (resptrans b' d)))
+                       (resptrans (trans refl b') (trans c d)) ≡ (trans (resptrans refl c) (resptrans b' d)))
                     b
                     (λ pqr p' q' c →
                        j
                        (λ p0 q0 c' →
                           (r' : Id y z) (d : Id q0 r') →
-                          (resptrans refl (trans c' d)) ≡
-                          (trans (resptrans refl c') (resptrans refl d)))
+                          (resptrans refl (trans c' d)) ≡ (trans (resptrans refl c') (resptrans refl d)))
                        c
                        (λ p'q' r' d →
                           j
                           (λ p'q0 r0 d' →
-                             (resptrans refl (trans refl d')) ≡
-                             (trans refl (resptrans refl d')))
+                             (resptrans refl (trans refl d')) ≡ (trans refl (resptrans refl d')))
                           d (λ _ → refl))))
