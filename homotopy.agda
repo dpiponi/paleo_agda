@@ -227,12 +227,12 @@ jay = j
 
 trans-resptrans-ichange : {A : Set} {x y z : A} 
              (p q : x ≡ y) 
-          -> (a : Id p q) (r : Id x y) (b : Id q r) 
-             (p' q' : Id y z) (c : Id p' q') 
-             (r' : Id y z) (d : Id q' r') 
-          -> Id (resptrans (trans a b) (trans c d)) (trans (resptrans a c) (resptrans b d))
+          -> (a : p ≡ q) (r : x ≡ y) (b : q ≡ r) 
+             (p' q' : y ≡ z) (c : p' ≡ q') 
+             (r' : y ≡ z) (d : q' ≡ r') 
+          -> (resptrans (trans a b) (trans c d)) ≡ (trans (resptrans a c) (resptrans b d))
 
-trans-resptrans-ichange {A}{x}{y}{z} p q a = jay
+trans-resptrans-ichange {A}{x}{y}{z} p q a = j
                  (λ p' q' a' →
                     (r : x ≡ y) (b : q' ≡ r) (p0 q0 : y ≡ z) (c : p0 ≡ q0) (r' : y ≡ z)
                     (d : q0 ≡ r') →
@@ -240,21 +240,21 @@ trans-resptrans-ichange {A}{x}{y}{z} p q a = jay
                     (trans (resptrans a' c) (resptrans b d)))
                  a
                  (λ pq r b →
-                    jay
+                    j
                     (λ pq' r' b' →
                        (p' q' : y ≡ z) (c : p' ≡ q') (r0 : y ≡ z) (d : q' ≡ r0) →
                        (resptrans (trans refl b') (trans c d)) ≡
                        (trans (resptrans refl c) (resptrans b' d)))
                     b
                     (λ pqr p' q' c →
-                       jay
+                       j
                        (λ p0 q0 c' →
                           (r' : Id y z) (d : Id q0 r') →
                           (resptrans refl (trans c' d)) ≡
                           (trans (resptrans refl c') (resptrans refl d)))
                        c
                        (λ p'q' r' d →
-                          jay
+                          j
                           (λ p'q0 r0 d' →
                              (resptrans refl (trans refl d')) ≡
                              (trans refl (resptrans refl d')))
