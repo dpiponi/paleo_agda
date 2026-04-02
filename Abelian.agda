@@ -21,7 +21,7 @@ module Paths where
  subst C p = j (λ x y _ → C x → C y) p (λ x → λ x' → x')
 
  trans : {A : Set} {M N P : A} → M ≡ N → N ≡ P → M ≡ P
- trans {A}{M}{N}{P} a b = subst (\ x → M ≡ x) b a
+ trans {A}{M}{N}{P} a b = subst (λ x → M ≡ x) b a
 
  sym : {a : Set} {x y : a} → x ≡ y → y ≡ x 
  sym p = j (λ x y _ → y ≡ x) p (λ _ → refl)
@@ -36,10 +36,10 @@ module Paths where
  _∎ _ = refl
 
  resp : {A C : Set} {M N : A} (f : A → C) → M ≡ N → f M ≡ f N
- resp {A}{C}{M}{N} f a = subst (\ x → f M ≡ f x) a refl
+ resp {A}{C}{M}{N} f a = subst ( λ x → f M ≡ f x) a refl
 
  resp2 : ∀ {A B C} {M N : A} {M' N' : B} (f : A → B → C) → M ≡ N → M' ≡ N' → f M M' ≡ f N N'
- resp2 {A}{B}{C}{M}{N}{M'}{N'} f a b = 
+ resp2 {A} {B} {C} {M} {N} {M'} {N'} f a b = 
    subst (λ x → f M M' ≡ f x N') a (subst (λ x → f M M' ≡ f M x) b refl) 
 
  trans-unit-l : {A : Set} {M N : A} → (p : M ≡ N) → trans refl p ≡ p
@@ -130,7 +130,7 @@ module FundamentalAbelian (A : Set) (base : A) where
   interchange a b c d = trans-resptrans-ichange  _ _ d _ c _ _ b _ a
 
   same : (a b : π₂El) → (a ∘ b) ≡ (a ⊙ b)
-  same a b = (( a         ∘ b)           ≡⟨ resp (λ x → x ∘ b) (sym (⊙-unit-r a)) ⟩ 
+  same a b = ((a         ∘ b)           ≡⟨ resp (λ x → x ∘ b) (sym (⊙-unit-r a)) ⟩ 
              ((a ⊙ refl) ∘ b)           ≡⟨ resp (λ x → (a ⊙ refl) ∘ x) (sym (⊙-unit-l b)) ⟩ 
              ((a ⊙ refl) ∘ (refl ⊙ b)) ≡⟨ sym (interchange a refl refl b) ⟩ 
              ((a ∘ refl) ⊙ (refl ∘ b)) ≡⟨ resp (λ x → x ⊙ (refl ∘ b)) (trans-unit-l a) ⟩ 
@@ -142,7 +142,7 @@ module FundamentalAbelian (A : Set) (base : A) where
                    ((refl ⊙ a) ∘ b)          ≡⟨ resp (λ x → (refl ⊙ a) ∘ x) (sym (⊙-unit-r b)) ⟩ 
                    ((refl ⊙ a) ∘ (b ⊙ refl)) ≡⟨ interchange refl b a refl ⟩ 
                    ((refl ∘ b) ⊙ (a ∘ refl)) ≡⟨ resp (λ x → x ⊙ (a ∘ refl)) (trans-unit-r b) ⟩ 
-                   (b         ⊙ (a ∘ refl)) ≡⟨ resp (λ x → b ⊙ x) (trans-unit-l a) ⟩ 
+                   (b          ⊙ (a ∘ refl)) ≡⟨ resp (λ x → b ⊙ x) (trans-unit-l a) ⟩ 
                    (b ⊙ a)                   ≡⟨ sym (same b a) ⟩ 
                    (b ∘ a)  ∎
 

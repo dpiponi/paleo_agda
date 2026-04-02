@@ -98,7 +98,8 @@ assoc-&& {true} = refl
 
 
 open import Data.List
-open import Data.List.Any
+open import Data.List.All hiding (map)
+open import Data.List.Any hiding (map)
 open import Level
 open Membership-≡
 
@@ -169,12 +170,10 @@ thm2a {p} {¬ ¬ a} {φ} (ε-¬ y) q = lemma3' (thm2a {p} {a} {φ} y q)
 
 data Contradiction : prop → Set where
     contra-∨ : {a : prop} → {b : prop} → Contradiction a → Contradiction b → Contradiction (a ∨ b)
---    contra-∧₁ : {a : prop} → Contradiction (¬ a) → (b : prop) → Contradiction (¬ (a ∨ b))
---    contra-∧₂ : (a : prop) → {b : prop} → Contradiction (¬ b) → Contradiction (¬ (a ∨ b))
     contra-¬ : {a : prop} → Contradiction a → Contradiction (¬ ¬ a)
---    contra-var₁ : {i : ℕ} → {a : prop} → {b : prop} → (Var i) ε ¬ a → (¬ Var i) ε ¬ b → Contradiction (¬ (a ∨ b))
---    contra-var₂ : {i : ℕ} → {a : prop} → {b : prop} → (¬ Var i) ε ¬ a → (Var i) ε ¬ b → Contradiction (¬ (a ∨ b))
     contra-var₃ : {i : ℕ} → {a : prop} → (Var i) ε a → (¬ Var i) ε a → Contradiction a
+    contra-∧₁ : {a : prop} → Contradiction (¬ a) → (b : prop) → Contradiction (¬ (a ∨ b))
+    contra-∧₂ : (a : prop) → {b : prop} → Contradiction (¬ b) → Contradiction (¬ (a ∨ b))
 
 elim₁ : {a : Bool} → { P : Set } → (a ≡ false → P) → (! a ≡ false → P) → P
 elim₁ {false} p q = p refl
@@ -184,6 +183,7 @@ elim₂ : {a : Bool} → { P : Set } → (! a ≡ false → P) → (a ≡ false 
 elim₂ {false} p q = q refl
 elim₂ {true} p q = p refl
 
+-- BIG THEOREM
 thm3 : {a : prop} → Contradiction a → {φ : Valuation} → ⟦ a ⟧ φ ≡ false
 thm3 {a} (contra-var₃ {i} {.a} y y') {φ} =
        elim₁ {⟦ Var i ⟧ φ} lem4 lem6 where
@@ -195,30 +195,76 @@ thm3 {a} (contra-var₃ {i} {.a} y y') {φ} =
 thm3 (contra-∨ {a} {b} y y') {φ} = lemma4' {⟦ a ⟧ φ} (thm3 y) (thm3 y')
 thm3 {¬ ¬ a} (contra-¬ y) {φ} = lemma3' {⟦ a ⟧ φ} (thm3 y)
 
-{-                                        
-thm3 {¬ (a ∨ b)} (contra-var₁ {i} {.a} {.b} y y') {φ} =
-       elim₁ {⟦ Var i ⟧ φ} lem4 lem6 where
-         lem7 : {u : Bool} → {v : Bool} → ! u ≡ false → ! (u || v) ≡ false
-         lem7 {false} = λ ()
-         lem7 {true} = λ x → refl
-         lem8 : {u : Bool} → {v : Bool} → ! v ≡ false → ! (u || v) ≡ false
-         lem8 {false} x = x
-         lem8 {true} _ = refl
-         lem4 : ⟦ Var i ⟧ φ ≡ false → ! ((⟦ a ⟧ φ) || (⟦ b ⟧ φ)) ≡ false
-         lem4 p = lem7 (thm2a {Var i} {¬ a} y p)
-         lem6 : ⟦ ¬ Var i ⟧ φ ≡ false → ! ((⟦ a ⟧ φ) || (⟦ b ⟧ φ)) ≡ false
-         lem6 p = lem8 {⟦ a ⟧ φ} (thm2a {¬ Var i} {¬ b} y' p)
 
-thm3 {¬ (a ∨ b)} (contra-var₂ {i} {.a} {.b} y y') {φ} =
-       elim₂ {⟦ Var i ⟧ φ} lem4 lem6 where
-         lem7 : {u : Bool} → {v : Bool} → ! u ≡ false → ! (u || v) ≡ false
-         lem7 {false} = λ ()
-         lem7 {true} = λ x → refl
-         lem8 : {u : Bool} → {v : Bool} → ! v ≡ false → ! (u || v) ≡ false
-         lem8 {false} = λ x → x
-         lem8 {true} = λ x → refl
-         lem4 : ⟦ ¬ Var i ⟧ φ ≡ false → ! ((⟦ a ⟧ φ) || (⟦ b ⟧ φ)) ≡ false
-         lem4 p = lem7 (thm2a {¬ Var i} {¬ a} {φ} y p)
-         lem6 : ⟦ Var i ⟧ φ ≡ false → ! ((⟦ a ⟧ φ) || (⟦ b ⟧ φ)) ≡ false
-         lem6 p = lem8 {⟦ a ⟧ φ} (thm2a {Var i} {¬ b} {φ} y' p)
+-- ⟦ a ∧ b ∧ c ⟧ always false
+
+-- ⟦ a ∧ b ⟧ always false
+
+-- ⟦ a ⟧ φ = false
+
+-- Break down ⟦ a ⟧ into list of props [a, b ∨ c, d, ...].
+
+outer : {A : Set} → (A → A → A) → List A → List A → List A
+outer _*_ [] _ = []
+outer _*_ (a ∷ as) bs = map (_*_ a) bs ++ outer _*_ as bs
+
+-- RTP ⟦ a ⟧ φ always false
+-- then φ false for all lists in tableau a
+
+⟪_⟫_ : List prop → Valuation → Bool
+⟪ [] ⟫ _ = true
+⟪ p ∷ ps ⟫ φ = (⟦ p ⟧ φ) || ⟪ ps ⟫ φ
+
+tableau : prop → List (List prop)
+tableau (Var i) = (Var i ∷ []) ∷ []
+tableau (¬ Var i) = (¬ Var i ∷ []) ∷ []
+tableau (¬ (a ∨ b)) = outer _++_ (tableau (¬ a)) (tableau (¬ b))
+tableau (a ∨ b) = tableau a ++ tableau b
+tableau (¬ ¬ a) = tableau a
+
+a : prop
+a = Var 0
+b : prop
+b = Var 1
+
+test4 = tableau ((¬ (a ∨ ¬ a)) ∨ b)
+
+{-
+open import Relation.Nullary hiding (¬_)
+
+data Inconsistent : List prop → Set where
+  inconstent : {i : ℕ} → {props : List prop} → Var i ∈ props → ¬ Var i ∈ props → Inconsistent props
+
+thm6 : {a : prop} → ({φ : Valuation} → ⟦ a ⟧ φ ≡ false) → All Inconsistent (tableau a)
+thm6 {Var i} p with Data.List.Any.any (λ x → Dec (x ≡ (Var i ∷ []))) (tableau a)
+thm6 {Var y} p | a = {!a !}
+thm6 {¬ Var y} p = {!!}
+thm6 {y ∨ y'} p = {!!}
+thm6 {¬ (y ∨ y')} p = {!!}
+thm6 {¬ ¬ a} p = {!thm6 {a} !}
 -}
+
+lemma10 : {a : Bool} → ! ! a ≡ false → a ≡ false
+lemma10 {false} p = refl
+lemma10 {true} p = p
+
+lemma11 : {a : Bool} → {b : Bool} → a || b ≡ false → a ≡ false
+lemma11 {false} p = refl
+lemma11 {true} p = p
+
+lemma12 : {a : Bool} → {b : Bool} → a || b ≡ false → b ≡ false
+lemma12 {a} {false} p = refl
+lemma12 {false} {true} p = p
+lemma12 {true} {true} p = p
+
+-- important : ({φ : Valuation} → ⟦ ¬ (a ∨ b) ⟧ φ == false) → 
+
+-- BIG THEOREM 2
+big : {a : prop} → ({φ : Valuation} → ⟦ a ⟧ φ ≡ false) → Contradiction a
+big {Var i} p with p {λ i → true}
+big {Var i} p | ()
+big {¬ Var i} p with p {λ i → false}
+big {¬ Var i} p | ()
+big {¬ ¬ a} p =  contra-¬ (big {a} (λ {φ} →  lemma10 (p {φ})))
+big {y ∨ y'} p = contra-∨ {y} {y'} (big {y} (λ {φ} → lemma11 (p {φ}))) ((big {y'} (λ {φ} → lemma12 {⟦ y ⟧ φ} (p {φ}))) )
+big {¬ (y ∨ y')} p = {!!}
